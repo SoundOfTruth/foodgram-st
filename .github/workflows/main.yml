@@ -61,7 +61,7 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: catastrophist/kittygram_backend:latest
+          tags: catastrophist/foodgram_backend:latest
   build_gateway_and_push_to_docker_hub:
     name: Push gateway Docker image to DockerHub
     runs-on: ubuntu-latest
@@ -80,7 +80,7 @@ jobs:
         with:
           context: ./infra/
           push: true
-          tags: catastrophist/kittygram_gateway:latest
+          tags: catastrophist/foodgram_proxy:latest
   frontend_tests:
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +92,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend/
-        npm ci
+        npm i
     - name: Test frontend
       run: |
         cd frontend/
@@ -116,7 +116,7 @@ jobs:
         with:
           context: ./frontend/
           push: true
-          tags: catastrophist/kittygram_frontend:latest
+          tags: catastrophist/foodgram_frontend:latest
   send_message:
     runs-on: ubuntu-latest
     needs:
