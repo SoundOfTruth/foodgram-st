@@ -78,7 +78,7 @@ jobs:
       - name: Push to DockerHub
         uses: docker/build-push-action@v5
         with:
-          context: ./nginx/
+          context: ./infra/
           push: true
           tags: catastrophist/kittygram_gateway:latest
   frontend_tests:
@@ -88,7 +88,7 @@ jobs:
     - name: Set up nodeJS
       uses: actions/setup-node@v4
       with:
-        node-version: 21.7.1-alpine
+        node-version: 21.7.1
     - name: Install dependencies
       run: |
         cd frontend/
