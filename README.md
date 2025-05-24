@@ -50,5 +50,5 @@ docker compose -f docker-compose-dev.yml up -d
 ### 6. Остановка сервисов
 Для остановки контейнеров выполните:
 ```bash
-docker-compose down
+docker compose down
 ```
