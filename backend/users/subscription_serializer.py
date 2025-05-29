@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 
 from recipes.serializers import SimpleRecipeSerializer
+from recipes.models import Recipe
 from .serializers import CustomUserSerializer
 from .models import Subscription
 
@@ -10,7 +11,7 @@ from .models import Subscription
 User = get_user_model()
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
+class CreateSubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
@@ -22,16 +23,28 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def to_representation(self, instance):
-        serializer = CustomUserSerializer(
-            instance.author, context=self.context)
-        result = serializer.data.copy()
+        author = instance.author
+        serializer = SubscriptionSerializer(author, context=self.context)
+        return serializer.data
+
+
+class SubscriptionSerializer(CustomUserSerializer):
+
+    def to_representation(self, instance):
         request = self.context.get('request')
         recipes_limit = request.query_params.get('recipes_limit')
-        recipes = instance.author.recipes.all()
-        result['recipes_count'] = len(recipes)
+        payload = CustomUserSerializer(
+            instance, context=self.context).data
+        recipes = Recipe.objects.filter(author=instance)
+        payload['recipes_count'] = len(recipes)
         if recipes_limit:
-            recipes = recipes[0:int(recipes_limit)]
-        recipe_serializer = SimpleRecipeSerializer(
-            recipes, many=True, context=self.context)
-        result['recipes'] = recipe_serializer.data
-        return result
+            try:
+                recipes = recipes[:int(recipes_limit)]
+            except ValueError:
+                raise serializers.ValidationError({
+                    'recipes_limit': 'Не является числом'
+                })
+        payload['recipes'] = SimpleRecipeSerializer(
+            recipes, many=True
+        ).data
+        return payload

@@ -1,22 +1,23 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from constants import MAX_FIRSTNAME_LENGTH, MAX_LASTNAME_LENGTH
+
 
 class CustomUser(AbstractUser):
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
     first_name = models.CharField(
         verbose_name='Имя',
-        max_length=150,
-        blank=False
+        max_length=MAX_FIRSTNAME_LENGTH,
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
-        max_length=150,
-        blank=False
+        max_length=MAX_LASTNAME_LENGTH,
     )
     email = models.EmailField(
-        verbose_name='Email',
-        blank=False, null=False,
-        unique=True
+        verbose_name='Почта',
+        unique=True,
     )
     avatar = models.ImageField(
         verbose_name='Фото',
@@ -28,6 +29,10 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+
+    def __str__(self):
+        return f'{self.username}: {self.email}'
 
 
 class Subscription(models.Model):

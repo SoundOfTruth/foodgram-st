@@ -20,23 +20,10 @@ class CustomUserSerializer(d_serializers.UserSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if request.user.is_anonymous:
-            return False
-        return obj.subscribers.filter(user=request.user).exists()
-
-
-class CustomUserCreateSerializer(d_serializers.UserCreateSerializer):
-
-    class Meta:
-        model = User
-        fields = ('email', 'id', 'username',
-                  'first_name', 'last_name', 'password',)
-
-
-class LoginSerializer(d_serializers.UserSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'password')
+        return (
+            request.user.is_authenticated
+            and obj.subscribers.filter(user=request.user).exists()
+        )
 
 
 class AvatarSerializer(serializers.ModelSerializer):

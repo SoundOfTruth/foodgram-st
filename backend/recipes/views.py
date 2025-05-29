@@ -1,26 +1,26 @@
-import io
-import csv
-from django.shortcuts import get_object_or_404
+from typing import Union
+
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.request import Request as BaseRequests, HttpRequest
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
-from typing import Union
 
-
+from api.filters import NameSearchFilter
+from api.pagination import DefaultPagination
 from .models import Ingredient, Recipe, Favorite, ShoppingCart
 from .serializers import (
     IngredientSerializer, RecipeReadSerializer, RecipeWriteSerializer,
     FavoriteSerializer, ShoppingCartSerializer)
+from .filters import RecipeFilter
 from .permissions import RecipePermission
-from .filters import NameSearchFilter
-from api.pagination import DefaultPagination
+from .utils import get_csv_data
 
 
 User = get_user_model()
@@ -35,36 +35,15 @@ class IngridientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.prefetch_related('ingredients')
+    queryset = Recipe.objects.prefetch_related('recipe_ingredients')
     serializer_class = RecipeWriteSerializer
     pagination_class = DefaultPagination
-    permission_classes = (RecipePermission, )
-    filter_backends = (DjangoFilterBackend, )
-    filterset_fields = ('author',)
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        user = self.request.user
-        if user.is_authenticated:
-            is_favorited = self.request.query_params.get('is_favorited')
-            is_in_shopping_cart = self.request.query_params.get(
-                'is_in_shopping_cart')
-            if is_favorited:
-                queryset = (
-                    queryset.filter(favorite__user=user)
-                    if is_favorited == '1'
-                    else queryset.exclude(favorite__user=user)
-                )
-            if is_in_shopping_cart:
-                queryset = (
-                    queryset.filter(in_shopping_cart__user=user)
-                    if is_in_shopping_cart == '1'
-                    else queryset.exclude(in_shopping_cart__user=user)
-                )
-        return queryset
+    permission_classes = (RecipePermission,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method in SAFE_METHODS:
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
@@ -72,8 +51,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     @action(
-        methods=['post', 'delete'], detail=True,
-        url_path="favorite", permission_classes=[IsAuthenticated]
+        methods=['POST', 'DELETE'], detail=True,
+        url_path='favorite', permission_classes=[IsAuthenticated]
     )
     def favorite(self, request: Request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
@@ -91,13 +70,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         favorite_objs = Favorite.objects.filter(
             user=request.user, recipe=recipe)
-        if favorite_objs.exists():
-            favorite_objs.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={'detail': 'Рецепта нет в избранном'},
-        )
+        delete_data = favorite_objs.delete()
+        if delete_data[0] == 0:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'detail': 'Рецепта нет в избранном'},
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         methods=['POST', 'DELETE'], detail=True,
@@ -119,13 +98,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         shopping_card_objs = ShoppingCart.objects.filter(
             user=request.user, recipe=recipe)
-        if shopping_card_objs.exists():
-            shopping_card_objs.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={'detail': 'Рецепта нет в избранном'},
-        )
+        delete_data = shopping_card_objs.delete()
+        if delete_data[0] == 0:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={'detail': 'Рецепта нет в корзине'},
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         methods=['GET'], detail=False,
@@ -133,34 +112,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_card(self, request: Request):
         user = request.user
-        shopping_cart = ShoppingCart.objects.filter(user=user)
-        if not shopping_cart.exists():
-            return Response(
-                {"error": "Корзина покупок пуста."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        ingredients = shopping_cart.values(
-            'recipe__ingredients__ingredient__name',
-            'recipe__ingredients__ingredient__measurement_unit'
-        ).annotate(amount=Sum('recipe__ingredients__amount'))
-        stream = io.StringIO()
-        writer = csv.writer(stream)
-        for ingredient in ingredients:
-            name = ingredient['recipe__ingredients__ingredient__name']
-            measurement_unit = ingredient[
-                'recipe__ingredients__ingredient__measurement_unit']
-            amount = ingredient['amount']
-            payload = [f'{name} ({measurement_unit})', amount]
-            writer.writerow(payload)
+        ingredients = ShoppingCart.objects.values(
+            'recipe__recipe_ingredients__ingredient__name',
+            'recipe__recipe_ingredients__ingredient__measurement_unit'
+        ).filter(user=user).annotate(
+            amount=Sum('recipe__recipe_ingredients__amount'))
+        data = get_csv_data(ingredients)
         return FileResponse(
-            stream.getvalue(),
+            data,
             as_attachment=True,
-            filename="shopping_list",
-            content_type="text/csv",
+            filename='shopping_list',
+            content_type='text/csv',
         )
 
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request: Request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
-        short_link = f'localhost/s/{recipe.pk}'
-        return Response({'short-link': short_link}, status=status.HTTP_200_OK)
+        short_link = request.build_absolute_uri(f'/s/{recipe.pk}')
+        return Response(
+            data={'short-link': short_link},
+            status=status.HTTP_200_OK
+        )

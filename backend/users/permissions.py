@@ -17,12 +17,10 @@ class UserPermission(permissions.BasePermission):
         return request.method in permissions.SAFE_METHODS
 
     def has_object_permission(self, request: Request, view, obj: CustomUser):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        elif request.user.is_anonymous:
-            return False
         return (
-            obj.pk == request.user.pk
-            or request.user.is_superuser
-            or request.user.is_staff
+            request.method in permissions.SAFE_METHODS
+            or (
+                request.user.is_authenticated
+                and obj.pk == request.user.pk
+            )
         )

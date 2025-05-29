@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
@@ -10,6 +11,7 @@ from typing import Union
 
 from api.pagination import DefaultPagination
 from .subscription_serializer import (
+    CreateSubscriptionSerializer,
     SubscriptionSerializer)
 from .serializers import CustomUserSerializer, AvatarSerializer
 from .models import CustomUser, Subscription
@@ -39,8 +41,8 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         serializer = AvatarSerializer(user, data=request.data)
         if self.request.method == 'PUT':
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(
                 status=status.HTTP_200_OK,
                 data=serializer.data
@@ -60,33 +62,34 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(CustomUser, pk=id)
         context = {'request': request}
         if self.request.method == 'POST':
-            serializer = SubscriptionSerializer(
+            serializer = CreateSubscriptionSerializer(
                 data={'user': user.pk, 'author': author.pk},
                 context=context
             )
-            if serializer.is_valid(raise_exception=True):
-                instance = serializer.save()
-                return Response(
-                    status=status.HTTP_201_CREATED,
-                    data=serializer.to_representation(instance))
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            return Response(
+                status=status.HTTP_201_CREATED,
+                data=serializer.to_representation(instance))
         subscription = Subscription.objects.filter(
             user=user, author=author)
-        if subscription.exists():
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data='subscription not exists'
-        )
+        delete_data = subscription.delete()
+        if delete_data[0] == 0:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data='Пользователя нет в подписках'
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         methods=['GET'], detail=False,
         url_path='subscriptions', permission_classes=[IsAuthenticated]
     )
     def subscriptions(self, request: Request):
-        subs = self.request.user.subscriptions.all()
-        paginator = DefaultPagination()
-        page = paginator.paginate_queryset(subs, request)
+        subs = CustomUser.objects.filter(
+            subscribers__user=self.request.user
+        )
+        page = self.paginate_queryset(subs)
         serializer = SubscriptionSerializer(
             page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+        return self.get_paginated_response(serializer.data)
