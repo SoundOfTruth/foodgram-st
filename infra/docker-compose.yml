@@ -26,6 +26,7 @@ services:
       python manage.py collectstatic
       python manage.py migrate
       bash data/set_up_data.sh
+      python manage.py loaddata data/recipes.json
       gunicorn --bind 0.0.0.0:8000 foodgram_backend.wsgi
     volumes:
       - static:/app/static
