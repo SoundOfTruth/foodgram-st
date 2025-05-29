@@ -16,6 +16,7 @@ services:
       - pg_data:/var/lib/postgresql/data
 
   backend:
+    container_name: foodgram-backend
     build: ../backend
     env_file: .env
     command: 
