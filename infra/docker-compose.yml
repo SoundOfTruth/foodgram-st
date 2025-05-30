@@ -26,8 +26,7 @@ services:
       python manage.py collectstatic
       python manage.py migrate
       python manage.py shell -c "exec(open('data/load_ingredients.py').read())"
-      python manage.py shell -c "exec(open('data/create_users.py').read())"
-      python manage.py loaddata data/recipes.json
+      bash data/set_up_data.sh
       gunicorn --bind 0.0.0.0:8000 foodgram_backend.wsgi
     volumes:
       - static:/app/static
