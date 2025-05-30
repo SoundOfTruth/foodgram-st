@@ -61,7 +61,7 @@ class RecipeIngredient(models.Model):
                 fields=('recipe', 'ingredient'),
                 name='unique_recipe_ingredient'
             )
-    ]
+        ]
 
     def __str__(self):
         return f'{self.recipe}({self.recipe.pk}) : {self.ingredient}'
