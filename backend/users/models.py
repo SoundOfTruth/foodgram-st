@@ -3,7 +3,8 @@ from django.contrib.auth.models import AbstractUser
 
 from constants import (
     MAX_FIRSTNAME_LENGTH,
-    MAX_LASTNAME_LENGTH
+    MAX_LASTNAME_LENGTH,
+    MAX_EMAIL_LENGTH
 )
 
 
@@ -21,6 +22,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(
         verbose_name='Почта',
         unique=True,
+        max_length=MAX_EMAIL_LENGTH,
     )
     avatar = models.ImageField(
         verbose_name='Фото',

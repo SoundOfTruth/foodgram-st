@@ -3,8 +3,11 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
 
 from constants import (
-    MAX_LENTH_INGREDIENT_NAME_LENGTH,
-    MAX_LENTH_INGREDIENT_MEASUREMENT_UNIT_LENGTH
+    MAX_INGREDIENT_NAME_LENGTH,
+    MAX_INGREDIENT_MEASUREMENT_UNIT_LENGTH,
+    MAX_RECIPE_NAME_LENGTH,
+    MIN_AMOUNT_LENGTH,
+    MIN_COOKING_TIME_LENGTH,
 )
 
 
@@ -14,12 +17,12 @@ User = get_user_model()
 class Ingredient(models.Model):
     name = models.CharField(
         verbose_name='Название',
-        max_length=MAX_LENTH_INGREDIENT_NAME_LENGTH,
+        max_length=MAX_INGREDIENT_NAME_LENGTH,
         unique=True
     )
     measurement_unit = models.CharField(
         verbose_name='Единица измерения',
-        max_length=MAX_LENTH_INGREDIENT_MEASUREMENT_UNIT_LENGTH
+        max_length=MAX_INGREDIENT_MEASUREMENT_UNIT_LENGTH
     )
 
     class Meta:
@@ -47,18 +50,18 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveIntegerField(
         verbose_name='Количество',
-        validators=[MinValueValidator(1),],
+        validators=[MinValueValidator(MIN_AMOUNT_LENGTH),],
     )
-    constraints = [
-        models.UniqueConstraint(
-            fields=('recipe', 'ingredient'),
-            name='unique_recipe_ingredient'
-        )
-    ]
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'
         verbose_name_plural = 'Ингредиенты рецепта'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('recipe', 'ingredient'),
+                name='unique_recipe_ingredient'
+            )
+    ]
 
     def __str__(self):
         return f'{self.recipe}({self.recipe.pk}) : {self.ingredient}'
@@ -72,18 +75,18 @@ class Recipe(models.Model):
     image = models.ImageField(
         verbose_name='Фото',
         upload_to='recipes/images/',
-        blank=False,
-        null=False
+        blank=False, null=False
     )
     name = models.CharField(
         verbose_name='Название',
-        max_length=256)
+        max_length=MAX_RECIPE_NAME_LENGTH
+    )
     text = models.TextField(
         verbose_name='Описание'
     )
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления (мин)',
-        validators=(MinValueValidator(1),)
+        validators=[MinValueValidator(MIN_COOKING_TIME_LENGTH),]
     )
 
     class Meta:
@@ -140,4 +143,4 @@ class ShoppingCart(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.recipe}({self.recipe.pk}) : {self.ingredient}'
+        return f'{self.recipe}'
