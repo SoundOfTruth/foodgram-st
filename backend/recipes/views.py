@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework.request import Request as BaseRequests, HttpRequest
 from rest_framework.response import Response
+from rest_framework.filters import OrderingFilter
 
 from api.filters import NameSearchFilter
 from api.pagination import DefaultPagination
@@ -48,8 +49,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeWriteSerializer
     pagination_class = DefaultPagination
     permission_classes = (RecipePermission,)
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = RecipeFilter
+    ordering = ('-id',)
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
