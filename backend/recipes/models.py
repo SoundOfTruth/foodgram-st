@@ -37,14 +37,12 @@ class Ingredient(models.Model):
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
-        'Recipe',
-        related_name='recipe_ingredients', verbose_name='Рецепт',
-        on_delete=models.CASCADE,
+        'Recipe', on_delete=models.CASCADE,
+        related_name='recipe_ingredients', verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(
-        Ingredient,
-        verbose_name='Ингредиент',
-        on_delete=models.CASCADE
+        Ingredient, on_delete=models.CASCADE,
+        verbose_name='Ингредиент'
     )
     amount = models.PositiveIntegerField(
         verbose_name='Количество',
@@ -67,9 +65,8 @@ class RecipeIngredient(models.Model):
 
 class Recipe(models.Model):
     author = models.ForeignKey(
-        User,
-        related_name='recipes', verbose_name='Автор',
-        on_delete=models.CASCADE
+        User, on_delete=models.CASCADE,
+        related_name='recipes', verbose_name='Автор'
     )
     image = models.ImageField(
         verbose_name='Фото',
@@ -99,14 +96,12 @@ class Recipe(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(
-        User,
-        related_name='favorites', verbose_name='Пользователь',
-        on_delete=models.CASCADE
+        User, on_delete=models.CASCADE,
+        related_name='favorites', verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
-        Recipe,
-        related_name='favorites', verbose_name='Рецепт',
-        on_delete=models.CASCADE
+        Recipe, on_delete=models.CASCADE,
+        related_name='favorites', verbose_name='Рецепт'
     )
 
     class Meta:
@@ -125,14 +120,12 @@ class Favorite(models.Model):
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
-        User,
-        related_name='shopping_carts', verbose_name='Пользователь',
-        on_delete=models.CASCADE
+        User, on_delete=models.CASCADE,
+        related_name='shopping_carts', verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
-        Recipe,
-        related_name='shopping_carts', verbose_name='Рецепт',
-        on_delete=models.CASCADE
+        Recipe, on_delete=models.CASCADE,
+        related_name='shopping_carts', verbose_name='Рецепт'
     )
 
     class Meta:

@@ -21,7 +21,9 @@ if is_empty:
         email='admin@admin.admin',
         username='admin',
         first_name='admin',
-        last_name='admin'
+        last_name='admin',
+        is_staff=True,
+        is_superuser=True
     )
 
     admin_user.set_password('passfortest')

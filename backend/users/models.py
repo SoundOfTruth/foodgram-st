@@ -37,10 +37,12 @@ class CustomUser(AbstractUser):
 
 class Subscription(models.Model):
     user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name='subscriptions',
+        CustomUser, on_delete=models.CASCADE,
+        related_name='subscriptions', verbose_name='Пользователь'
     )
     author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name='subscribers',
+        CustomUser, on_delete=models.CASCADE,
+        related_name='subscribers', verbose_name='Подписка'
     )
 
     class Meta:

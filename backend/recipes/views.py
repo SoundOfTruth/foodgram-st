@@ -14,12 +14,12 @@ from rest_framework.response import Response
 
 from api.filters import NameSearchFilter
 from api.pagination import DefaultPagination
+from api.permissions import RecipePermission
 from .models import Ingredient, Recipe, Favorite, ShoppingCart
 from .serializers import (
     IngredientSerializer, RecipeReadSerializer, RecipeWriteSerializer,
     FavoriteSerializer, ShoppingCartSerializer)
 from .filters import RecipeFilter
-from .permissions import RecipePermission
 from .utils import get_csv_data
 
 

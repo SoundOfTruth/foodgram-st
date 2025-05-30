@@ -44,4 +44,9 @@ class UserAdmin(DefaultUserAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user', 'author')
+    list_filter = ('user', 'author')
+    search_fields = (
+        'user__username', 'author__username',
+        'user__email', 'author__email'
+    )

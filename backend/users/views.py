@@ -1,4 +1,3 @@
-from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
@@ -15,7 +14,6 @@ from .subscription_serializer import (
     SubscriptionSerializer)
 from .serializers import CustomUserSerializer, AvatarSerializer
 from .models import CustomUser, Subscription
-from .permissions import UserPermission
 
 
 Request = Union[BaseRequests, HttpRequest]
@@ -24,14 +22,7 @@ Request = Union[BaseRequests, HttpRequest]
 class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = (UserPermission,)
     pagination_class = DefaultPagination
-
-    def get_serializer(self, *args, **kwargs):
-        return super().get_serializer(
-            context={'request': self.request},
-            *args, **kwargs
-        )
 
     @action(
         methods=['PUT', 'DELETE'], detail=False,
