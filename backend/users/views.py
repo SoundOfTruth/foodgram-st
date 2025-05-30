@@ -1,3 +1,5 @@
+from typing import Union
+
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import status
@@ -5,15 +7,14 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request as BaseRequests, HttpRequest
 from rest_framework.response import Response
-from typing import Union
-
 
 from api.pagination import DefaultPagination
+from .models import CustomUser, Subscription
+from .serializers import CustomUserSerializer, AvatarSerializer
 from .subscription_serializer import (
     CreateSubscriptionSerializer,
-    SubscriptionSerializer)
-from .serializers import CustomUserSerializer, AvatarSerializer
-from .models import CustomUser, Subscription
+    SubscriptionSerializer
+)
 
 
 Request = Union[BaseRequests, HttpRequest]

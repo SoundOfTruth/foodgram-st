@@ -1,7 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from constants import MAX_FIRSTNAME_LENGTH, MAX_LASTNAME_LENGTH
+from constants import (
+    MAX_FIRSTNAME_LENGTH,
+    MAX_LASTNAME_LENGTH
+)
 
 
 class CustomUser(AbstractUser):

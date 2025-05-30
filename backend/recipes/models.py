@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 
 from constants import (
     MAX_LENTH_INGREDIENT_NAME_LENGTH,
-    MAX_LENTH_INGREDIENT_MEASUREMENT_UNIT_LENGTH)
+    MAX_LENTH_INGREDIENT_MEASUREMENT_UNIT_LENGTH
+)
 
 
 User = get_user_model()
