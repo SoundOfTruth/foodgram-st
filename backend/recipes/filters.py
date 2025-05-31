@@ -1,21 +1,13 @@
-import django_filters
+from django_filters import rest_framework as filters
 
 from .models import Recipe
 
 
-class RecipeFilter(django_filters.FilterSet):
-    is_favorited = django_filters.ChoiceFilter(
-        choices=[
-            ('1', 'True'),
-            ('0', 'False'),
-        ],
+class RecipeFilter(filters.FilterSet):
+    is_favorited = filters.BooleanFilter(
         method='filter_favorites',
     )
-    is_in_shopping_cart = django_filters.ChoiceFilter(
-        choices=[
-            ('1', 'True'),
-            ('0', 'False'),
-        ],
+    is_in_shopping_cart = filters.BooleanFilter(
         method='filter_shopping_carts',
     )
 
@@ -26,7 +18,7 @@ class RecipeFilter(django_filters.FilterSet):
     def filter_favorites(self, queryset, name, value):
         user = self.request.user
         if user.is_authenticated:
-            if value == '1':
+            if value:
                 return queryset.filter(favorites__user=user)
             return queryset.exclude(favorites__user=user)
         return queryset
@@ -34,7 +26,7 @@ class RecipeFilter(django_filters.FilterSet):
     def filter_shopping_carts(self, queryset, name, value):
         user = self.request.user
         if user.is_authenticated:
-            if value == '1':
+            if value:
                 return queryset.filter(shopping_carts__user=user)
             return queryset.exclude(shopping_carts__user=user)
         return queryset

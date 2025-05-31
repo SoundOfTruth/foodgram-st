@@ -65,8 +65,8 @@ class CustomUserViewSet(UserViewSet):
                 data=serializer.to_representation(instance))
         subscription = Subscription.objects.filter(
             user=user, author=author)
-        delete_data = subscription.delete()
-        if delete_data[0] == 0:
+        deleted_count, _ = subscription.delete()
+        if deleted_count == 0:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
                 data='Пользователя нет в подписках'

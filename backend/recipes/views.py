@@ -61,17 +61,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer: RecipeWriteSerializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        methods=['POST', 'DELETE'], detail=True,
-        url_path='favorite', permission_classes=[IsAuthenticated]
-    )
-    def favorite(self, request: Request, pk=None):
+    def create_delete_recipe_relation(self, object, serializer, pk, error):
         recipe = get_object_or_404(Recipe, pk=pk)
-        if request.method == 'POST':
-            data = {'user': request.user.pk, 'recipe': recipe.pk}
-            serializer = FavoriteSerializer(
+        if self.request.method == 'POST':
+            data = {'user': self.request.user.pk, 'recipe': recipe.pk}
+            serializer = serializer(
                 data=data,
-                context={'request': request}
+                context={'request': self.request}
             )
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
@@ -79,43 +75,40 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer.to_representation(instance),
                 status=status.HTTP_201_CREATED,
             )
-        favorite_objs = Favorite.objects.filter(
-            user=request.user, recipe=recipe)
-        delete_data = favorite_objs.delete()
-        if delete_data[0] == 0:
+        favorite_objs = object.objects.filter(
+            user=self.request.user, recipe=recipe
+        )
+        deleted_count, _ = favorite_objs.delete()
+        if deleted_count == 0:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={'detail': 'Рецепта нет в избранном'},
+                data={'detail': error},
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        methods=['POST', 'DELETE'], detail=True,
+        url_path='favorite', permission_classes=[IsAuthenticated]
+    )
+    def favorite(self, request: Request, pk=None):
+        return self.create_delete_recipe_relation(
+            object=Favorite,
+            serializer=FavoriteSerializer,
+            pk=pk,
+            error='Рецепта нет в избранном'
+        )
 
     @action(
         methods=['POST', 'DELETE'], detail=True,
         url_path='shopping_cart',
     )
     def shopping_card(self, request: Request, pk=None):
-        recipe = get_object_or_404(Recipe, pk=pk)
-        if request.method == 'POST':
-            data = {'user': request.user.pk, 'recipe': recipe.pk}
-            serializer = ShoppingCartSerializer(
-                data=data,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            instance = serializer.save()
-            return Response(
-                serializer.to_representation(instance),
-                status=status.HTTP_201_CREATED,
-            )
-        shopping_card_objs = ShoppingCart.objects.filter(
-            user=request.user, recipe=recipe)
-        delete_data = shopping_card_objs.delete()
-        if delete_data[0] == 0:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'detail': 'Рецепта нет в корзине'},
-            )
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.create_delete_recipe_relation(
+            object=ShoppingCart,
+            serializer=ShoppingCartSerializer,
+            pk=pk,
+            error='Рецепта нет в корзине'
+        )
 
     @action(
         methods=['GET'], detail=False,

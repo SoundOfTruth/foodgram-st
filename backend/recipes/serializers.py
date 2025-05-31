@@ -51,21 +51,18 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'text', 'cooking_time', 'is_favorited', 'is_in_shopping_cart')
         model = Recipe
 
-    def get_is_favorited(self, obj):
+    def is_user_relation(self, manager):
         request = self.context.get('request')
-        if request.user.is_anonymous:
-            return False
         return (
             request.user.is_authenticated
-            and obj.favorites.filter(user=request.user).exists()
+            and manager.filter(user=request.user).exists()
         )
 
+    def get_is_favorited(self, obj):
+        return self.is_user_relation(obj.favorites)
+
     def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        return (
-            request.user.is_authenticated
-            and obj.shopping_carts.filter(user=request.user).exists()
-        )
+        return self.is_user_relation(obj.shopping_carts)
 
 
 class RecipeIngredientWriteSerializer(serializers.ModelSerializer):
@@ -110,13 +107,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'ingredients': 'id ингрединтов дублируются'}
             )
-        for ingredient in ingredients:
-            ingredient_id = ingredient.get('id')
-            if not Ingredient.objects.filter(id=ingredient_id).exists():
-                error = f'Ингредиент с id: {ingredient_id} не существует'
-                raise serializers.ValidationError(
-                    {'ingredients': error}
-                )
         return super().validate(data)
 
     def create(self, validated_data):
@@ -128,12 +118,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        print(validated_data)
         ingredients_data = validated_data.pop('ingredients', None)
-        recipe = super().update(instance, validated_data)
-        recipe.recipe_ingredients.all().delete()
-        self.__save_ingredients(recipe, ingredients_data)
-        return recipe
+        instance.recipe_ingredients.all().delete()
+        self.__save_ingredients(instance, ingredients_data)
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return RecipeReadSerializer(

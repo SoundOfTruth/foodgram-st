@@ -28,6 +28,7 @@ cd foodgram-st
 по примеру ниже, либо из .env.example
 
 ```bash
+LOAD_TEST_DATA='True'
 SECRET='secret'
 DEBUG='False'
 POSTGRES_DB='django'
@@ -55,7 +56,7 @@ docker compose -f docker-compose-dev.yml up -d
 ### 4. Загрузка данных
 
 Все данные загружаются автоматически через заготовленные скрипты
-Загрузку можно отключить убрав команду bash data/set_up_data.sh
+Загрузку можно отключить изменив LOAD_TEST_DATA в .env на False
 из сервиса бэкенда в infra/docker-compose.yml.
 для очиски бд от тестовых данных можно использовать
 ```bash
