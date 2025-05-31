@@ -13,24 +13,23 @@ from rest_framework.request import Request as BaseRequests, HttpRequest
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter
 
-from api.filters import NameSearchFilter
+from api.filters import NameSearchFilter, RecipeFilter
 from api.pagination import DefaultPagination
 from api.permissions import RecipePermission
-from .filters import RecipeFilter
-from .models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    ShoppingCart
-)
-from .serializers import (
+from api.serializers.recipes import (
     FavoriteSerializer,
     IngredientSerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
     ShoppingCartSerializer
 )
-from .utils import get_csv_data
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    ShoppingCart
+)
+from recipes.utils import get_csv_data
 
 
 User = get_user_model()

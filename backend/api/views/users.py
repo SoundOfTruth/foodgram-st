@@ -9,12 +9,12 @@ from rest_framework.request import Request as BaseRequests, HttpRequest
 from rest_framework.response import Response
 
 from api.pagination import DefaultPagination
-from .models import CustomUser, Subscription
-from .serializers import CustomUserSerializer, AvatarSerializer
-from .subscription_serializer import (
+from api.serializers.subscriptions import (
     CreateSubscriptionSerializer,
     SubscriptionSerializer
 )
+from api.serializers.users import AvatarSerializer, CustomUserSerializer
+from users.models import CustomUser, Subscription
 
 
 Request = Union[BaseRequests, HttpRequest]
