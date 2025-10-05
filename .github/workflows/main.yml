@@ -32,6 +32,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        cd backend/
         uv sync --locked
 
     - name: Lint with ruff and run django tests
