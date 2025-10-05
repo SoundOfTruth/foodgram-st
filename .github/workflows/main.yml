@@ -43,8 +43,8 @@ jobs:
         DB_HOST: 127.0.0.1
         DB_PORT: 5432
       run: |
-        ls
-        uv run ruff check
+        cd backend/
+        uv run python -m ruff check
         uv run python manage.py test
 
   build_and_push_to_docker_hub:
