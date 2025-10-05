@@ -23,11 +23,11 @@ services:
     - sh
     - -c
     - |
-      python manage.py collectstatic
-      python manage.py migrate
-      python manage.py shell -c "exec(open('data/load_ingredients.py').read())"
-      python manage.py shell -c "exec(open('data/load_test_data.py').read())"
-      gunicorn --bind 0.0.0.0:8000 foodgram_backend.wsgi
+      uv run python manage.py collectstatic
+      uv run python manage.py migrate
+      uv run python manage.py shell -c "exec(open('data/load_ingredients.py').read())"
+      uv run python manage.py shell -c "exec(open('data/load_test_data.py').read())"
+      uv run gunicorn --bind 0.0.0.0:8000 foodgram_backend.wsgi
     volumes:
       - static:/app/static
       - media:/app/media
