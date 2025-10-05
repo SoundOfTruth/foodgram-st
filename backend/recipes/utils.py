@@ -8,7 +8,8 @@ def get_csv_data(ingredients):
     for ingredient in ingredients:
         name = ingredient['recipe__recipe_ingredients__ingredient__name']
         measurement_unit = ingredient[
-            'recipe__recipe_ingredients__ingredient__measurement_unit']
+            'recipe__recipe_ingredients__ingredient__measurement_unit'
+        ]
         amount = ingredient['amount']
         payload = [f'{name} ({measurement_unit})', amount]
         writer.writerow(payload)

@@ -1,11 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from constants import (
-    MAX_FIRSTNAME_LENGTH,
-    MAX_LASTNAME_LENGTH,
-    MAX_EMAIL_LENGTH
-)
+from constants import MAX_FIRSTNAME_LENGTH, MAX_LASTNAME_LENGTH, MAX_EMAIL_LENGTH
 
 
 class CustomUser(AbstractUser):
@@ -28,7 +24,8 @@ class CustomUser(AbstractUser):
         verbose_name='Фото',
         upload_to='users/images/',
         default=None,
-        null=True, blank=True
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -42,12 +39,16 @@ class CustomUser(AbstractUser):
 
 class Subscription(models.Model):
     user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE,
-        related_name='subscriptions', verbose_name='Пользователь'
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+        verbose_name='Пользователь',
     )
     author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE,
-        related_name='subscribers', verbose_name='Подписка'
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscribers',
+        verbose_name='Подписка',
     )
 
     class Meta:
@@ -56,8 +57,7 @@ class Subscription(models.Model):
         ordering = ('user_id',)
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'author'],
-                name='subscription_user_author'
+                fields=['user', 'author'], name='subscription_user_author'
             )
         ]
 

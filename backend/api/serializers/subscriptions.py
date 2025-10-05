@@ -11,10 +11,12 @@ User = get_user_model()
 
 
 class CreateSubscriptionSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Subscription
-        fields = ('user', 'author',)
+        fields = (
+            'user',
+            'author',
+        )
 
     def validate(self, attrs):
         if attrs.get('user') == attrs.get('author'):
@@ -28,22 +30,18 @@ class CreateSubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(CustomUserSerializer):
-
     def to_representation(self, instance):
         request = self.context.get('request')
         recipes_limit = request.query_params.get('recipes_limit')
-        payload = CustomUserSerializer(
-            instance, context=self.context).data
+        payload = CustomUserSerializer(instance, context=self.context).data
         recipes = Recipe.objects.filter(author=instance)
         payload['recipes_count'] = len(recipes)
         if recipes_limit:
             try:
-                recipes = recipes[:int(recipes_limit)]
+                recipes = recipes[: int(recipes_limit)]
             except ValueError:
-                raise serializers.ValidationError({
-                    'recipes_limit': 'Не является числом'
-                })
-        payload['recipes'] = SimpleRecipeSerializer(
-            recipes, many=True
-        ).data
+                raise serializers.ValidationError(
+                    {'recipes_limit': 'Не является числом'}
+                )
+        payload['recipes'] = SimpleRecipeSerializer(recipes, many=True).data
         return payload

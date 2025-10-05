@@ -1,15 +1,19 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET')
+DEBUG = os.getenv('DEBUG', 'false').lower()
 
-DEBUG = os.getenv('DEBUG', 'false').lower() == 'true'
+SECRET_KEY = os.getenv('SECRET') if DEBUG else 'dev'
 
-ALLOWED_HOSTS = os.getenv(
-    'ALLOWED_HOSTS', '127.0.0.1, localhost'
-).replace(' ', '').split(',')
+
+ALLOWED_HOSTS = (
+    os.getenv('ALLOWED_HOSTS', '127.0.0.1, localhost').replace(' ', '').split(',')
+)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -65,7 +69,7 @@ if os.getenv('USE_POSTGRES', 'false').lower() == 'true':
             'USER': os.getenv('POSTGRES_USER', 'postgres'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
             'HOST': os.getenv('DB_HOST'),
-            'PORT': int(os.getenv('DB_PORT', 5432))
+            'PORT': int(os.getenv('DB_PORT', 5432)),
         }
     }
 else:
@@ -111,7 +115,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = [
-    "djoser.auth_backends.LoginFieldBackend",
+    'djoser.auth_backends.LoginFieldBackend',
 ]
 
 REST_FRAMEWORK = {

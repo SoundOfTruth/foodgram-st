@@ -1,4 +1,3 @@
-
 import json
 
 from recipes.models import Ingredient
@@ -12,8 +11,7 @@ if is_empty:
     for ingredient in ingredients:
         Ingredients_list.append(
             Ingredient(
-                name=ingredient['name'],
-                measurement_unit=ingredient['measurement_unit']
+                name=ingredient['name'], measurement_unit=ingredient['measurement_unit']
             )
         )
     Ingredient.objects.bulk_create(Ingredients_list)

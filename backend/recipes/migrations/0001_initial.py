@@ -5,17 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
             name='Favorite',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Избранное',
@@ -25,9 +31,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Ingredient',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=128, unique=True, verbose_name='Название')),
-                ('measurement_unit', models.CharField(max_length=64, verbose_name='Единица измерения')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
+                (
+                    'name',
+                    models.CharField(
+                        max_length=128, unique=True, verbose_name='Название'
+                    ),
+                ),
+                (
+                    'measurement_unit',
+                    models.CharField(max_length=64, verbose_name='Единица измерения'),
+                ),
             ],
             options={
                 'verbose_name': 'Ингредиент',
@@ -38,11 +60,28 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Recipe',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to='recipes/images/', verbose_name='Фото')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
+                (
+                    'image',
+                    models.ImageField(upload_to='recipes/images/', verbose_name='Фото'),
+                ),
                 ('name', models.CharField(max_length=256, verbose_name='Название')),
                 ('text', models.TextField(verbose_name='Описание')),
-                ('cooking_time', models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Время приготовления (мин)')),
+                (
+                    'cooking_time',
+                    models.PositiveIntegerField(
+                        validators=[django.core.validators.MinValueValidator(1)],
+                        verbose_name='Время приготовления (мин)',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Рецепт',
@@ -53,8 +92,22 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RecipeIngredient',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.PositiveIntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
+                (
+                    'amount',
+                    models.PositiveIntegerField(
+                        validators=[django.core.validators.MinValueValidator(1)],
+                        verbose_name='Количество',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Ингредиент рецепта',
@@ -65,7 +118,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ShoppingCart',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    'id',
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'Корзина',

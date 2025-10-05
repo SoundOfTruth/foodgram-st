@@ -10,12 +10,8 @@ class UserAdmin(DefaultUserAdmin):
     search_fields = ('username', 'email')
 
     fieldsets = (
-        (
-            '', {'fields': ('username', 'email', 'password')}
-        ),
-        (
-            'Personal info', {'fields': ('first_name', 'last_name')}
-        ),
+        ('', {'fields': ('username', 'email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name')}),
         (
             'Permissions',
             {
@@ -26,9 +22,7 @@ class UserAdmin(DefaultUserAdmin):
                 )
             },
         ),
-        (
-            'Important dates', {'fields': ('last_login', 'date_joined')}
-        ),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
     add_fieldsets = (
@@ -47,6 +41,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('user', 'author')
     list_filter = ('user', 'author')
     search_fields = (
-        'user__username', 'author__username',
-        'user__email', 'author__email'
+        'user__username',
+        'author__username',
+        'user__email',
+        'author__email',
     )

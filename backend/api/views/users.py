@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from api.pagination import DefaultPagination
 from api.serializers.subscriptions import (
     CreateSubscriptionSerializer,
-    SubscriptionSerializer
+    SubscriptionSerializer,
 )
 from api.serializers.users import AvatarSerializer, CustomUserSerializer
 from users.models import CustomUser, Subscription
@@ -26,8 +26,10 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = DefaultPagination
 
     @action(
-        methods=['PUT', 'DELETE'], detail=False,
-        url_path="me/avatar", permission_classes=[IsAuthenticated]
+        methods=['PUT', 'DELETE'],
+        detail=False,
+        url_path='me/avatar',
+        permission_classes=[IsAuthenticated],
     )
     def change_avatar(self, request: Request):
         user = request.user
@@ -35,10 +37,7 @@ class CustomUserViewSet(UserViewSet):
         if self.request.method == 'PUT':
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(
-                status=status.HTTP_200_OK,
-                data=serializer.data
-            )
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
         user.avatar = None
         user.save()
         return Response(
@@ -46,8 +45,10 @@ class CustomUserViewSet(UserViewSet):
         )
 
     @action(
-        methods=['POST', 'DELETE'], detail=True,
-        url_path='subscribe', permission_classes=[IsAuthenticated]
+        methods=['POST', 'DELETE'],
+        detail=True,
+        url_path='subscribe',
+        permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request: Request, id=None):
         user = request.user
@@ -55,33 +56,32 @@ class CustomUserViewSet(UserViewSet):
         context = {'request': request}
         if self.request.method == 'POST':
             serializer = CreateSubscriptionSerializer(
-                data={'user': user.pk, 'author': author.pk},
-                context=context
+                data={'user': user.pk, 'author': author.pk}, context=context
             )
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
             return Response(
                 status=status.HTTP_201_CREATED,
-                data=serializer.to_representation(instance))
-        subscription = Subscription.objects.filter(
-            user=user, author=author)
+                data=serializer.to_representation(instance),
+            )
+        subscription = Subscription.objects.filter(user=user, author=author)
         deleted_count, _ = subscription.delete()
         if deleted_count == 0:
             return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data='Пользователя нет в подписках'
+                status=status.HTTP_400_BAD_REQUEST, data='Пользователя нет в подписках'
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        methods=['GET'], detail=False,
-        url_path='subscriptions', permission_classes=[IsAuthenticated]
+        methods=['GET'],
+        detail=False,
+        url_path='subscriptions',
+        permission_classes=[IsAuthenticated],
     )
     def subscriptions(self, request: Request):
-        subs = CustomUser.objects.filter(
-            subscribers__user=self.request.user
-        )
+        subs = CustomUser.objects.filter(subscribers__user=self.request.user)
         page = self.paginate_queryset(subs)
         serializer = SubscriptionSerializer(
-            page, many=True, context={'request': request})
+            page, many=True, context={'request': request}
+        )
         return self.get_paginated_response(serializer.data)

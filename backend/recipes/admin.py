@@ -30,14 +30,7 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'author__username')
     inlines = [RecipeIngredientInline]
 
-    fieldsets = (
-        ('', {
-            'fields': (
-                'name', 'author', 'image',
-                'text', 'cooking_time'
-            )
-        }),
-    )
+    fieldsets = (('', {'fields': ('name', 'author', 'image', 'text', 'cooking_time')}),)
 
     @admin.display(description='Добавлено в избранное')
     def favorites_count(self, obj):

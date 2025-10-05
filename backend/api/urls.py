@@ -6,12 +6,8 @@ from api.views import recipes
 
 
 router = DefaultRouter()
-router.register(
-    'ingredients', recipes.IngridientViewSet, basename='ingredient'
-)
-router.register(
-    'recipes', recipes.RecipeViewSet, basename='recipe'
-)
+router.register('ingredients', recipes.IngridientViewSet, basename='ingredient')
+router.register('recipes', recipes.RecipeViewSet, basename='recipe')
 user_router = DefaultRouter()
 user_router.register('users', CustomUserViewSet, basename='user')
 

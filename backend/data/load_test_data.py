@@ -4,16 +4,13 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 
 
-if os.getenv('LOAD_TEST_DATA', 'false').lower() == 'true':
+if os.getenv('LOAD_TEST_DATA', 'true').lower() == 'true':
     User = get_user_model()
     is_empty = User.objects.count() == 0
 
     if is_empty:
         test_user = User(
-            email='test@test.test',
-            username='test',
-            first_name='test',
-            last_name='test'
+            email='test@test.test', username='test', first_name='test', last_name='test'
         )
 
         test_user.set_password('passfortest')
@@ -25,7 +22,7 @@ if os.getenv('LOAD_TEST_DATA', 'false').lower() == 'true':
             first_name='admin',
             last_name='admin',
             is_staff=True,
-            is_superuser=True
+            is_superuser=True,
         )
 
         admin_user.set_password('passfortest')

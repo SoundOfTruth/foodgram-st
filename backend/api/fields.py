@@ -6,7 +6,6 @@ from rest_framework import serializers
 
 
 class Base64ImageField(serializers.ImageField):
-
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, image = data.split(';base64,')

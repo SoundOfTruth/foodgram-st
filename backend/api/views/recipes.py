@@ -21,14 +21,9 @@ from api.serializers.recipes import (
     IngredientSerializer,
     RecipeReadSerializer,
     RecipeWriteSerializer,
-    ShoppingCartSerializer
+    ShoppingCartSerializer,
 )
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    ShoppingCart
-)
+from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart
 from recipes.utils import get_csv_data
 
 
@@ -64,19 +59,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         if self.request.method == 'POST':
             data = {'user': self.request.user.pk, 'recipe': recipe.pk}
-            serializer = serializer(
-                data=data,
-                context={'request': self.request}
-            )
+            serializer = serializer(data=data, context={'request': self.request})
             serializer.is_valid(raise_exception=True)
             instance = serializer.save()
             return Response(
                 serializer.to_representation(instance),
                 status=status.HTTP_201_CREATED,
             )
-        favorite_objs = object.objects.filter(
-            user=self.request.user, recipe=recipe
-        )
+        favorite_objs = object.objects.filter(user=self.request.user, recipe=recipe)
         deleted_count, _ = favorite_objs.delete()
         if deleted_count == 0:
             return Response(
@@ -86,19 +76,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        methods=['POST', 'DELETE'], detail=True,
-        url_path='favorite', permission_classes=[IsAuthenticated]
+        methods=['POST', 'DELETE'],
+        detail=True,
+        url_path='favorite',
+        permission_classes=[IsAuthenticated],
     )
     def favorite(self, request: Request, pk=None):
         return self.create_delete_recipe_relation(
             object=Favorite,
             serializer=FavoriteSerializer,
             pk=pk,
-            error='Рецепта нет в избранном'
+            error='Рецепта нет в избранном',
         )
 
     @action(
-        methods=['POST', 'DELETE'], detail=True,
+        methods=['POST', 'DELETE'],
+        detail=True,
         url_path='shopping_cart',
     )
     def shopping_card(self, request: Request, pk=None):
@@ -106,20 +99,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
             object=ShoppingCart,
             serializer=ShoppingCartSerializer,
             pk=pk,
-            error='Рецепта нет в корзине'
+            error='Рецепта нет в корзине',
         )
 
-    @action(
-        methods=['GET'], detail=False,
-        url_path='download_shopping_cart'
-    )
+    @action(methods=['GET'], detail=False, url_path='download_shopping_cart')
     def download_shopping_card(self, request: Request):
         user = request.user
-        ingredients = ShoppingCart.objects.values(
-            'recipe__recipe_ingredients__ingredient__name',
-            'recipe__recipe_ingredients__ingredient__measurement_unit'
-        ).filter(user=user).annotate(
-            amount=Sum('recipe__recipe_ingredients__amount'))
+        ingredients = (
+            ShoppingCart.objects.values(
+                'recipe__recipe_ingredients__ingredient__name',
+                'recipe__recipe_ingredients__ingredient__measurement_unit',
+            )
+            .filter(user=user)
+            .annotate(amount=Sum('recipe__recipe_ingredients__amount'))
+        )
         data = get_csv_data(ingredients)
         return FileResponse(
             data,
@@ -132,7 +125,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_link(self, request: Request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         short_link = request.build_absolute_uri(f'/s/{recipe.pk}')
-        return Response(
-            data={'short-link': short_link},
-            status=status.HTTP_200_OK
-        )
+        return Response(data={'short-link': short_link}, status=status.HTTP_200_OK)
